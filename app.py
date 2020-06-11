@@ -59,3 +59,7 @@ def auth():
 def logout():
     session.pop('user', None)
     return redirect('/')
+
+
+if __name__ == '__main__':
+    app.run(threaded=True, port=5000)
