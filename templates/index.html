@@ -18,12 +18,16 @@
         <p class="card-text">
             Click the button below to login and do the forking process...
         </p>
+        <pre>User Info: {{ user|tojson }}</pre>
         {% if not user %}
         <a class="btn btn-primary btn-social btn-github" style="width: 200px" href="/login">
             <i class="fa fa-github"></i> Sign in with Github
         </a>
         {% else %}
-        <pre>{user|tojson}</pre>
+        <a class="btn btn-primary" href="/fork">
+            <i class="fas fa-code-branch"></i> Fork gh-forker
+        </a>
+        &nbsp;
         <a class="btn btn-primary" href="/logout">
             <i class="fas fa-sign-out"></i> Sign out of Github
         </a>

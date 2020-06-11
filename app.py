@@ -2,7 +2,6 @@ import os
 import sys
 
 from authlib.integrations.flask_client import OAuth
-from loginpass.github import GitHub as github_login
 from flask import (
     Flask,
     abort,
@@ -11,6 +10,8 @@ from flask import (
     session,
     url_for
 )
+
+from github_auth import register_github
 
 THIS_REPO = 'phrakture/gh-forker'
 
@@ -28,8 +29,7 @@ app.config['GITHUB_CLIENT_ID'] = env_or_death('GITHUB_CLIENT_ID')
 app.config['GITHUB_CLIENT_SECRET'] = env_or_death('GITHUB_CLIENT_SECRET')
 
 oauth = OAuth(app)
-# using loginpass for DRY
-oauth.register(name='github', **github_login.OAUTH_CONFIG)
+register_github(oauth)
 
 
 @app.route('/')
