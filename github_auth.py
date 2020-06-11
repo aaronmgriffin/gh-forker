@@ -28,7 +28,7 @@ def register_github(oauth):
         api_base_url='https://api.github.com/',
         access_token_url='https://github.com/login/oauth/access_token',
         authorize_url='https://github.com/login/oauth/authorize',
-        client_kwargs={'scope': 'user:email repo'},
+        client_kwargs={'scope': 'read:user user:email public_repo'},
         userinfo_endpoint='https://api.github.com/user',
         userinfo_compliance_fix=normalize_userinfo,
     )

@@ -49,6 +49,7 @@ def login():
 
 @app.route('/auth')
 def auth():
+    print(request.query_string)
     session['user'] = oauth.github.parse_id_token(
         oauth.github.authorize_access_token()
     )
