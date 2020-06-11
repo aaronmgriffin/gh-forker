@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- lots of deps to get some good look-n-feel and social buttons, eh? -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-social/4.12.0/bootstrap-social.min.css">
+</head>
+<body class="text-center">
+    <div class="card" style="width: 600px">
+    <div class="card-body">
+        <h3 class="card-title">What is this?</h3>
+        <p class="card-text">
+            This is gh-forker, a silly little exercise that asks you to log into github and then
+            forks it's own repo into your account. It's sort of like a virus, but one you choose
+            to get.
+        </p>
+        <p class="card-text">
+            Click the button below to login and do the forking process...
+        </p>
+        {% if not user %}
+        <a class="btn btn-primary btn-social btn-github" style="width: 200px" href="/login">
+            <i class="fa fa-github"></i> Sign in with Github
+        </a>
+        {% else %}
+        <pre>{user|tojson}</pre>
+        <a class="btn btn-primary" href="/logout">
+            <i class="fas fa-sign-out"></i> Sign out of Github
+        </a>
+        {% endif %}
+    </div>
+</body>
+</html>
