@@ -18,8 +18,8 @@ app, oauth = setup(__name__)
 def index():
     already_forked = False
     if 'token' in session:
-        gf = GithubForker(session['token']['access_token'])
-        already_forked = gf.repo_exists(REPO_TO_FORK)
+        forker = GithubForker(session['token']['access_token'])
+        already_forked = forker.repo_exists(REPO_TO_FORK)
 
     return render_template(
         'index.html',
@@ -61,8 +61,8 @@ def auth():
 def fork():
     msg = 'No token found, login first.'
     if 'token' in session:
-        gf = GithubForker(session['token']['access_token'])
-        msg = gf.fork_from(REPO_TO_FORK)
+        forker = GithubForker(session['token']['access_token'])
+        msg = forker.fork_from(REPO_TO_FORK)
 
     return redirect(url_for('index', msg=msg))
 

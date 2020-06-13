@@ -39,7 +39,7 @@ def getenv(name):
 
 
 def setup(name):
-    app = Flask(__name__)
+    app = Flask(name)
     app.config.from_mapping(
         SECRET_KEY=getenv('SESSION_KEY'),
         GITHUB_CLIENT_ID=getenv('GITHUB_CLIENT_ID'),
