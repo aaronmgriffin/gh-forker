@@ -1,4 +1,11 @@
-# This is taken direct from authlib/loginpass for github authentication
+import os
+import sys
+
+from flask import Flask
+from authlib.integrations.flask_client import OAuth
+
+
+# This method is taken direct from authlib/loginpass for sanitizing github user info
 def normalize_userinfo(client, data):
     params = {
         'sub': str(data['id']),
@@ -22,7 +29,24 @@ def normalize_userinfo(client, data):
     return params
 
 
-def register_github(oauth):
+def getenv(name):
+    envvar = os.getenv(name)
+    if not envvar:
+        msg = "Configuration Error: no '%s' environment variable found" % name
+        sys.stderr.write(msg + '\n')
+        raise RuntimeError(msg)
+    return envvar
+
+
+def setup(name):
+    app = Flask(__name__)
+    app.config.from_mapping(
+        SECRET_KEY=getenv('SESSION_KEY'),
+        GITHUB_CLIENT_ID=getenv('GITHUB_CLIENT_ID'),
+        GITHUB_CLIENT_SECRET=getenv('GITHUB_CLIENT_SECRET')
+    )
+
+    oauth = OAuth(app)
     oauth.register(
         name='github',
         api_base_url='https://api.github.com/',
@@ -32,3 +56,6 @@ def register_github(oauth):
         userinfo_endpoint='https://api.github.com/user',
         userinfo_compliance_fix=normalize_userinfo,
     )
+
+    return app, oauth
+

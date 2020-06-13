@@ -1,47 +1,37 @@
-import os
-import sys
-
-from authlib.integrations.flask_client import OAuth
 from flask import (
-    Flask,
-    abort,
     redirect,
     render_template,
+    request,
+    Response,
     session,
     url_for
 )
 
-from github_auth import register_github
+from app_setup import setup
+from forker import GithubForker
 
-THIS_REPO = 'phrakture/gh-forker'
+REPO_TO_FORK = 'phrakture/gh-forker'
 
-def env_or_death(name):
-    envvar = os.getenv(name)
-    if not envvar:
-        msg = "Configuration Error: no '%s' environment variable found" % name
-        sys.stderr.writeln(msg)
-        raise RuntimeError(msg)
-    return envvar
-
-app = Flask(__name__)
-app.secret_key = env_or_death('SESSION_KEY')
-app.config['GITHUB_CLIENT_ID'] = env_or_death('GITHUB_CLIENT_ID')
-app.config['GITHUB_CLIENT_SECRET'] = env_or_death('GITHUB_CLIENT_SECRET')
-
-oauth = OAuth(app)
-register_github(oauth)
-
+app, oauth = setup(__name__)
 
 @app.route('/')
 def index():
+    already_forked = False
+    if 'token' in session:
+        gf = GithubForker(session['token']['access_token'])
+        already_forked = gf.repo_exists(REPO_TO_FORK)
+
     return render_template(
         'index.html',
-        user=session.get('user')
+        user=session.get('user'),
+        already_forked=already_forked,
+        msg=request.args.get('msg')
     )
 
 
 @app.route('/login')
 def login():
+    # Bounce to github for authentication
     return oauth.github.authorize_redirect(
         url_for('auth', _external=True)
     )
@@ -49,15 +39,37 @@ def login():
 
 @app.route('/auth')
 def auth():
-    print(request.query_string)
-    session['user'] = oauth.github.parse_id_token(
-        oauth.github.authorize_access_token()
-    )
+    if 'error' in request.args:
+        # TODO this could use a prettier error page, but at another time
+        return Response(
+            '\n'.join((
+                f"Authentication Error: {request.args.get('error')}",
+                f"Description: {request.args.get('error_description')}",
+                f"See: {request.args.get('error_uri')}"
+            )),
+            mimetype='text/plain'
+        )
+    # github redirects here once authenticated
+    # Now we can now get the user's access_token and other info
+    session['token'] = oauth.github.authorize_access_token()
+    session['user'] = oauth.github.userinfo(token=session['token'])
+
     return redirect('/')
+
+
+@app.route('/fork')
+def fork():
+    msg = 'No token found, login first.'
+    if 'token' in session:
+        gf = GithubForker(session['token']['access_token'])
+        msg = gf.fork_from(REPO_TO_FORK)
+
+    return redirect(url_for('index', msg=msg))
 
 
 @app.route('/logout')
 def logout():
+    session.pop('token', None)
     session.pop('user', None)
     return redirect('/')
 
